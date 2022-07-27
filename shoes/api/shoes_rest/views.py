@@ -15,10 +15,16 @@ class BinVOEncoder(ModelEncoder):
 class ShoeListEncoder(ModelEncoder):
     model = Shoe
     properties = [
+        'manufacturer',
         'model_name',
+        'color',
         'picture_url',
+        'bin',
         'id',
     ]
+    encoders = {
+        "bin": BinVOEncoder(),
+    }
 
 class ShoeDetailEncoder(ModelEncoder):
     model = Shoe
@@ -47,10 +53,7 @@ def api_shoes(request, bin_vo_id=None):
 
     """
     if request.method == "GET":
-        if bin_vo_id:
-            shoes = Shoe.objects.filter(bin=bin_vo_id)
-        else:
-            shoes = Shoe.objects.all()
+        shoes = Shoe.objects.all()
         return JsonResponse(
                 {"shoes": shoes},
                 encoder=ShoeListEncoder,
