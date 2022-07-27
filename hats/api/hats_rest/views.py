@@ -4,7 +4,21 @@ from django.http import JsonResponse
 from .models import Hat, LocationVO
 import json
 
-class HatEncoder(ModelEncoder):
+class LocationVOEncoder(ModelEncoder):
+    model= LocationVO
+    properties= [
+        "closet_name", 
+        "section_number", 
+        "shelf_number",
+        "import_href",
+    ]
+
+class HatListEncoder(ModelEncoder):
+    model = Hat
+    properties= ["style_name", "id", "picture_url"]
+
+
+class HatDetailEncoder(ModelEncoder):
     model = Hat
     properties = [
         "fabric",
@@ -13,14 +27,9 @@ class HatEncoder(ModelEncoder):
         "picture_url",
         "location",
     ]
+    encoders={"location": LocationVOEncoder()}
 
-class LocationVoEncoder(ModelEncoder):
-    model= LocationVO
-    properties= [
-        "closet_name", 
-        "section_number", 
-        "shelf_number"
-    ]
+
 
 
 @require_http_methods(["GET", "POST"])
@@ -36,25 +45,33 @@ def api_hats(request, location_vo_id=None):
     """
 
     if request.method == "GET":
-        if location_vo_id is not None:
-            hats = Hat.objects.filter(location=location_vo_id)
-        else:
-            hats= Hat.objects.all()
+        hats = Hat.objects.all()
         return JsonResponse(
-            {"hats": hat},
-            encoder=HatEncoder,
+            {"hats": hats},
+            encoder=HatListEncoder,
         )
 
     else: 
         content= json.loads(request.body)
+        try:
+            # location_href = f"api/locations/{location_vo_id}/"
+            location = LocationVO.objects.get(import_href=content["location"])
+            content["location"] = location
+
+        except LocationVO.DoesNotExist:
+            return JsonResponse(
+                {"message": " Invalid location id"}, 
+                status =400,
+            )
+            
         hat= Hat.objects.create(**content)
         return JsonResponse(
             hat,
-            encoder=HatEncoder,
+            encoder=HatDetailEncoder,
             safe= False,
         )
 
-@require_http_methods("DELETE")
+@require_http_methods(["GET", "DELETE"])
 def api_hat(request, pk):
     """
     Single-object API for the Hat resource.
@@ -62,17 +79,24 @@ def api_hat(request, pk):
     DELETE:
     Removes the hat resource from the application
     """
-
-    try: 
+    if request.method == "GET":
         hat= Hat.objects.get(id=pk)
-        hat.delete()
         return JsonResponse(
             hat,
-            encoder= HatEncoder,
+            encoder= HatDetailEncoder,
             safe= False,
         )
-    except Hat.DoesNotExist:
-        response= JsonResponse({"message": "Does not exist"})
-        response.status_code = 404
-        return response
+
+    else:
+        try: 
+            hat= Hat.objects.get(id=pk)
+            hat.delete()
+            return JsonResponse(
+                hat,
+                encoder= HatDetailEncoder,
+                safe= False,
+            )
+        except Hat.DoesNotExist:
+            response= JsonResponse({"message": "No longer exist"})
+            return response
 
