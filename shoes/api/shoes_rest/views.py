@@ -1,11 +1,26 @@
+from json import encoder
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 import json
 
 from common.json import ModelEncoder
-from .models import Shoe
+from .models import Shoe, BinVO
 
-class ShoeEncoder(ModelEncoder):
+class BinVOEncoder(ModelEncoder):
+    model = BinVO
+    properties = [
+        'import_href',
+    ]
+
+class ShoeListEncoder(ModelEncoder):
+    model = Shoe
+    properties = [
+        'model_name',
+        'picture_url',
+        'id',
+    ]
+
+class ShoeDetailEncoder(ModelEncoder):
     model = Shoe
     properties = [
         'manufacturer',
@@ -14,9 +29,14 @@ class ShoeEncoder(ModelEncoder):
         'picture_url',
         'bin',
     ]
+    encoders = {
+        "bin": BinVOEncoder(),
+    }
+
+
 
 @require_http_methods(['GET', 'POST'])
-def api_shoes(request):
+def api_shoes(request, bin_vo_id=None):
     """
     Collection RESTful Api for Shoe objects in bins
 
@@ -27,17 +47,30 @@ def api_shoes(request):
 
     """
     if request.method == "GET":
-        shoes = Shoe.objects.all()
+        if bin_vo_id:
+            shoes = Shoe.objects.filter(bin=bin_vo_id)
+        else:
+            shoes = Shoe.objects.all()
         return JsonResponse(
-            {"shoes": shoes},
-            encoder=ShoeEncoder,
-        )
+                {"shoes": shoes},
+                encoder=ShoeListEncoder,
+            )
     else:
         content = json.loads(request.body)
+        try:
+            import_href = content['bin']
+            bin = BinVO.objects.get(import_href=import_href)
+            print("HERE", bin, import_href)
+            content['bin'] = bin
+        except BinVO.DoesNotExist:
+            return JsonResponse(
+                {"message": "Invalid bin href"},
+                status=400,
+            )
         shoe = Shoe.objects.create(**content)
         return JsonResponse(
             shoe,
-            encode=ShoeEncoder,
+            encoder=ShoeDetailEncoder,
             safe=False,
         )
 
@@ -52,7 +85,7 @@ def api_shoe(request, pk):
         shoe.delete()
         return JsonResponse(
             shoe,
-            encoder=ShoeEncoder,
+            encoder=ShoeDetailEncoder,
             safe=False
         )
     except Shoe.DoesNotExist:
