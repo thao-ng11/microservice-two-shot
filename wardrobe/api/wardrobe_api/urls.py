@@ -1,5 +1,4 @@
-from django.urls import path
-from .views import api_location, api_locations, api_bin, api_bins
+ api_locations, api_bin, api_bins
 
 
 urlpatterns = [
