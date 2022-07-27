@@ -1,5 +1,5 @@
-from .views import api_locations, api_location, api_bin, api_bins
 from django.urls import path
+from .views import api_location, api_locations, api_bin, api_bins
 
 urlpatterns = [
     path("locations/", api_locations, name="api_locations"),
