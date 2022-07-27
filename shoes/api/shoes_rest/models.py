@@ -12,7 +12,7 @@ class Shoe(models.Model):
     color = models.CharField(max_length=30)
     picture_url = models.URLField(max_length=100, null=True)
 
-    bin = models.models.ForeignKey(
+    bin = models.ForeignKey(
         BinVO,
         related_name='bins', 
         on_delete=models.PROTECT
