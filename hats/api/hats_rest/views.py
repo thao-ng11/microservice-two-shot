@@ -1,7 +1,7 @@
 from django.views.decorators.http import require_http_methods
 from common.json import ModelEncoder
 from django.http import JsonResponse
-from .models import Hat
+from .models import Hat, LocationVO
 import json
 
 class HatEncoder(ModelEncoder):
@@ -14,8 +14,17 @@ class HatEncoder(ModelEncoder):
         "location",
     ]
 
+class LocationVoEncoder(ModelEncoder):
+    model= LocationVO
+    properties= [
+        "closet_name", 
+        "section_number", 
+        "shelf_number"
+    ]
+
+
 @require_http_methods(["GET", "POST"])
-def api_hats(request):
+def api_hats(request, location_vo_id=None):
     """
     Collection RESTful API handler for Hat objects in Location
 
@@ -27,7 +36,10 @@ def api_hats(request):
     """
 
     if request.method == "GET":
-        hats= Hat.objects.all()
+        if location_vo_id is not None:
+            hats = Hat.objects.filter(location=location_vo_id)
+        else:
+            hats= Hat.objects.all()
         return JsonResponse(
             {"hats": hat},
             encoder=HatEncoder,
