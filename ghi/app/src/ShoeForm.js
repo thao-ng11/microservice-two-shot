@@ -10,7 +10,8 @@ class ShoeForm extends React.Component {
             picture_url: '',
             bins: [],
         }
-        // bind here
+        this.handleChange = this.handleChange.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
     }
     
     async componentDidMount() {
@@ -26,10 +27,10 @@ class ShoeForm extends React.Component {
 
     handleChange(event) {
         const value = event.target.value
-        const key  = event.target.model_name
+        const key  = event.target.name
         const changeDict = {}
         changeDict[key] = value
-        this.setState(changeDict);
+        this.setState(changeDict)
     }
 
     async handleSubmit(event) {
