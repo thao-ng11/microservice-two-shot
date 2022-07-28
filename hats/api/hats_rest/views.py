@@ -21,7 +21,10 @@ class HatListEncoder(ModelEncoder):
         "color", 
         "picture_url",
         "id",
-        ]
+        "location",
+    ]
+    encoders={"location": LocationVOEncoder()}
+    
 
 
 class HatDetailEncoder(ModelEncoder):

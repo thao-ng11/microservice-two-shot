@@ -5,7 +5,7 @@ class HatForm extends React.Component {
     super(props);
     this.state = {
       fabric: "",
-      styleName: "",
+      style_name: "",
       color: "",
       picture_url: "",
       locations: [],
@@ -14,14 +14,13 @@ class HatForm extends React.Component {
     this.handleStyleNameChange = this.handleStyleNameChange.bind(this);
     this.handleColorChange = this.handleColorChange.bind(this);
     this.handleLocationChange = this.handleLocationChange.bind(this);
+    this.handlePictureLinkChange = this.handlePictureLinkChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   async handleSubmit(event) {
     event.preventDefault();
-    const data = { ...this.location };
-    data.styleName = data.styleName;
-    delete data.styleName;
+    const data = { ...this.state };
     delete data.locations;
 
     const locationUrl = "http://localhost:8090/api/hats/";
@@ -39,7 +38,7 @@ class HatForm extends React.Component {
 
       const cleared = {
         fabric: "",
-        styleName: "",
+        style_name: "",
         color: "",
         picture_url: "",
         locations: [],
@@ -68,8 +67,13 @@ class HatForm extends React.Component {
     this.setState({ location: value });
   }
 
+  handlePictureLinkChange(event) {
+    const value = event.target.value;
+    this.setState({ picture_url: value });
+  }
+
   async componentDidMount() {
-    const url = "http://localhost:8090/api/locations/";
+    const url = "http://localhost:8100/api/locations/";
 
     const response = await fetch(url);
 
@@ -105,7 +109,7 @@ class HatForm extends React.Component {
                   onChange={this.handleColorChange}
                   placeholder="Color"
                   required
-                  type="number"
+                  type="text"
                   name="color"
                   id="color"
                   className="form-control"
@@ -125,6 +129,19 @@ class HatForm extends React.Component {
                 />
                 <label htmlFor="style_name">Style name</label>
               </div>
+              <div className="form-floating mb-3">
+                <input
+                  value={this.state.picture_url}
+                  onChange={this.handlePictureLinkChange}
+                  placeholder="Picture URL"
+                  required
+                  type="text"
+                  name="picture_url"
+                  id="picture_url"
+                  className="form-control"
+                />
+                <label htmlFor="picture_url">Picture url</label>
+              </div>
               <div className="mb-3">
                 <select
                   value={this.state.location}
@@ -137,11 +154,8 @@ class HatForm extends React.Component {
                   <option value="">Choose a location</option>
                   {this.state.locations.map((location) => {
                     return (
-                      <option
-                        key={location.abbreviation}
-                        value={location.abbreviation}
-                      >
-                        {location.name}
+                      <option key={location.href} value={location.href}>
+                        {location.closet_name}
                       </option>
                     );
                   })}

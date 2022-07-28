@@ -1,7 +1,31 @@
-function HatsList(props) {
-  if (props.hats === undefined) {
-    return null;
-  }
+import React, { useState, useEffect } from "react";
+
+function HatsList() {
+  const [hats, setHats] = useState([]);
+
+  const fetchHats = async () => {
+    const url = "http://localhost:8090/api/hats/";
+    const result = await fetch(url);
+    const hatsJSON = await result.json();
+    console.log(hatsJSON);
+    setHats(hatsJSON.hats);
+  };
+
+  useEffect(() => {
+    fetchHats();
+  }, []);
+
+  const handleDelete = async (id) => {
+    await fetch(`http://localhost:8090/api/hats/${id}`, {
+      method: "DELETE",
+    });
+    setHats(
+      hats.filter((hat) => {
+        return hat.id !== id;
+      })
+    );
+  };
+
   return (
     <table className="table table-striped">
       <thead>
@@ -10,20 +34,20 @@ function HatsList(props) {
           <th>Style Name</th>
           <th>Color</th>
           <th>Picture</th>
-          {/* <th>Location</th> */}
+          <th>Location</th>
         </tr>
       </thead>
       <tbody>
-        {props.hats.map((hat) => {
+        {hats.map((hat) => {
           return (
             <tr key={hat.id}>
               <td>{hat.fabric}</td>
               <td>{hat.style_name}</td>
               <td>{hat.color}</td>
               <td>{hat.picture_url}</td>
-              {/* <td>{hat.location}</td> */}
+              <td>http://localhost:3000{hat.location.import_href}</td>
               <td>
-                <button>Delete?</button>
+                <button onClick={() => handleDelete(hat.id)}>Delete</button>
               </td>
             </tr>
           );

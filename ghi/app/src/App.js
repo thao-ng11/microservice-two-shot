@@ -4,6 +4,7 @@ import Nav from "./Nav";
 import ShoesList from "./ShoesList";
 import HatsList from "./HatsList";
 import ShoeForm from "./ShoeForm";
+import HatForm from "./HatForm";
 
 function App(props) {
   // if (props.hats || props.shoes === undefined) {
@@ -17,11 +18,11 @@ function App(props) {
           <Route path="/" element={<MainPage />} />
           <Route path="shoes/">
             <Route path="" element={<ShoesList />} />
-            <Route path='new' element={<ShoeForm />} />
+            <Route path="new" element={<ShoeForm />} />
           </Route>
           <Route path="hats/">
             <Route path="" element={<HatsList hats={props.hats} />} />
-            {/* <Route path='new' element={<HatForm />} /> */}
+            <Route path="new" element={<HatForm />} />
           </Route>
         </Routes>
       </div>
