@@ -15,7 +15,13 @@ class LocationVOEncoder(ModelEncoder):
 
 class HatListEncoder(ModelEncoder):
     model = Hat
-    properties= ["style_name", "id", "picture_url"]
+    properties= [
+        "fabric",
+        "style_name", 
+        "color", 
+        "picture_url",
+        "id",
+        ]
 
 
 class HatDetailEncoder(ModelEncoder):
@@ -75,6 +81,8 @@ def api_hats(request, location_vo_id=None):
 def api_hat(request, pk):
     """
     Single-object API for the Hat resource.
+
+    
 
     DELETE:
     Removes the hat resource from the application
